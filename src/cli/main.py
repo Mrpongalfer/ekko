@@ -1,15 +1,18 @@
-# src/cli/main.py
-import click
+#!/usr/bin/env python3
+from qiskit import QuantumCircuit
+from gemini_pro import GeminiFlash
 
-@click.group()
-def cli():
-    """Ekko v0.1 - Reality Forge"""
-
-@cli.command()
-@click.argument('project')
-def init(project):
-    """Scaffold new project"""
-    click.echo(f"Initializing {project} with Ekko rules...")
+class NeuroCLI:
+    def __init__(self):
+        self.qc = QuantumCircuit($QUANTUM_BITS)
+        self.llm = GeminiFlash(context_window="1M")
+    
+    def launch(self, command):
+        print(f"🔮 Quantum-optimizing: {command}")
+        return self.llm.generate(
+            prompt=command,
+            quantum_circuit=self.qc
+        )
 
 if __name__ == "__main__":
-    cli()
+    NeuroCLI().launch(" ".join(sys.argv[1:]))
