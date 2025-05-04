@@ -6,7 +6,7 @@ class NeuroCLI:
     def __init__(self):
         self.qc = QuantumCircuit($QUANTUM_BITS)
         self.llm = GeminiFlash(context_window="1M")
-    
+
     def launch(self, command):
         print(f"🔮 Quantum-optimizing: {command}")
         return self.llm.generate(

@@ -51,10 +51,10 @@ TEST_PROJECT="ekko_test_project_$RANDOM"
 
 if [[ -d "$TEST_PROJECT" ]]; then
     echo -e "${GREEN}✔ Project generation works${NC}"
-    
+
     # Patch validate.sh to use detected Python
     sed -i "s/python/$PYTHON_CMD/" "$TEST_PROJECT/scripts/validate.sh"
-    
+
     # Verify critical files
     for file in "src/sample.py" "tests/test_sample.py" "scripts/validate.sh"; do
         if [[ ! -f "$TEST_PROJECT/$file" ]]; then

@@ -36,7 +36,7 @@ dependencies = [
 "tomllib>=1.0.4,<2.0.0; python_version < '3.11'", # Include for <3.11 compatibility if needed elsewhere, though project requires 3.12
 "GitPython>=3.1.40,<4.0.0",
 "PyYAML>=6.0,<7.0" # Often needed alongside Ansible/configs
-]  
+]
 
     [project.optional-dependencies]
     dev = [

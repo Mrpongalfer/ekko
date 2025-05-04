@@ -48,7 +48,7 @@ class NeuroCLI:
     def __init__(self):
         self.qc = QuantumCircuit($QUANTUM_BITS)
         self.llm = GeminiFlash(context_window="1M")
-    
+
     def launch(self, command):
         print(f"🔮 Quantum-optimizing: {command}")
         return self.llm.generate(
@@ -72,7 +72,7 @@ class ChaosGod:
             self._entangle_qubits,
             self._overwrite_production
         ])
-    
+
     def attack(self):
         return [self.destructor()() for _ in range($CHAOS_LEVEL)]
 EOD

@@ -8,6 +8,6 @@ class ChaosGod:
             self._entangle_qubits,
             self._overwrite_production
         ])
-    
+
     def attack(self):
         return [self.destructor()() for _ in range($CHAOS_LEVEL)]

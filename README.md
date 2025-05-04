@@ -3,7 +3,7 @@
 
 ![Ekko Banner](assets/banner.png)
 
-**Copyright © 2024 MrPongalfer**  
+**Copyright © 2024 MrPongalfer**
 *Licensed under Quantum Commercial License v1.0*
 
 ## ✨ Features

@@ -13,7 +13,7 @@ jobs:
           ekko validate --strict \
             --pylint .ekko/core_team/stark.yaml \
             --coverage 95
-      
+
   sanchez_chaos:
     runs-on: ubuntu-self-hosted  # Needs bare metal
     steps:
