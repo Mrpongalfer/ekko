@@ -3,6 +3,7 @@
 """Project Ekko - FastAPI Backend (Placeholder)"""
 
 import logging
+import sys
 
 from fastapi import FastAPI
 
@@ -44,14 +45,13 @@ async def health_check():
 # - Deployments (POST /projects/{id}/deployments)
 # - Status updates
 
-# Add uvicorn runner for direct execution (primarily for development)
+
 if __name__ == "__main__":
     try:
         import uvicorn
 
         logger.info("Running Uvicorn server for development...")
-        # Use host 0.0.0.0 to be accessible on network if needed
-        uvicorn.run(app, host="0.0.0.0", port=8888, log_level="info")
+        uvicorn.run(app, host="127.0.0.1", port=8888, log_level="info")
     except ImportError:
         logger.error("Uvicorn not installed. Run 'pip install uvicorn[standard]'")
         print(

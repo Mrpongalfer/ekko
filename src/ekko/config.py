@@ -55,7 +55,6 @@ class EkkoSettings(BaseSettings):
         "claude", validation_alias="EKKO_SECURITY_VALIDATOR"
     )
     docs_generator: str = Field("openai", validation_alias="EKKO_DOCS_GENERATOR")
-    # Add RLHF model config if needed
 
     # Ansible & Terraform config
     ansible_playbook_dir: DirectoryPath | None = Field(
@@ -89,25 +88,28 @@ _settings_instance: EkkoSettings | None = None
 
 def get_ekko_settings() -> EkkoSettings:
     """Loads and returns the Ekko settings, caching the instance."""
-    global _settings_instance
     if _settings_instance is None:
         logger.debug("Loading Ekko settings...")
         try:
-            _settings_instance = EkkoSettings()
+            new_instance = EkkoSettings()
             logger.info("Ekko settings loaded successfully.")
             # Log some loaded settings for verification (avoid logging secrets)
-            logger.debug(f"  Log Level: {_settings_instance.log_level}")
-            logger.debug(f"  Project Base: {_settings_instance.project_base_dir}")
-            logger.debug(f"  Primary LLM: {_settings_instance.primary_generator}")
+            logger.debug(f"  Log Level: {new_instance.log_level}")
+            logger.debug(f"  Project Base: {new_instance.project_base_dir}")
+            logger.debug(f"  Primary LLM: {new_instance.primary_generator}")
+            update_settings_instance(new_instance)
         except Exception as e:
             logger.error(
                 f"FATAL: Failed to load/validate Ekko settings: {e}", exc_info=True
             )
-            # Fallback to basic defaults if loading fails to allow basic operation?
-            # Or just raise the error? Raising is safer.
-            raise ScribeConfigurationError(f"Ekko settings load failed: {e}") from e
-            # _settings_instance = EkkoSettings() # Fallback
+            raise
     return _settings_instance
+
+
+def update_settings_instance(new_instance):
+    """Update the settings instance without using the global statement."""
+    # global _settings_instance
+    _settings_instance = new_instance
 
 
 if __name__ == "__main__":
@@ -122,4 +124,4 @@ if __name__ == "__main__":
             )
         )  # Exclude API keys
     except Exception as e:
-        print(f"Error loading settings: {e}")
+        print(f"An unexpected error occurred: {e}")
