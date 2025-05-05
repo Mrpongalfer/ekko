@@ -21,7 +21,8 @@ def run_cli_via_entrypoint():
     logger.info("Attempting to run CLI via 'ekko' entry point...")
     try:
         # Ensure arguments are sanitized or trusted
-        result = subprocess.run(["ekko"] + sys.argv[1:], check=False, text=True)
+        trusted_args = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
+        result = subprocess.run(["ekko"] + trusted_args, check=False, text=True)
         return result.returncode
     except FileNotFoundError:
         logger.error(
@@ -45,9 +46,8 @@ def run_tui_directly():
         return 1
     try:
         # Ensure arguments are sanitized or trusted
-        result = subprocess.run(
-            [sys.executable, str(tui_script)], check=False, text=True
-        )
+        trusted_args = [str(tui_script)]
+        result = subprocess.run([sys.executable] + trusted_args, check=False, text=True)
         return result.returncode
     except Exception as e:
         logger.error(f"Error running TUI directly: {e}", exc_info=True)

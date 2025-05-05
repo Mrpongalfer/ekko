@@ -1,71 +1,62 @@
 #!/usr/bin/env python3
-# File: src/ekko/tui/main.py
 """
-Ekko TUI Block 1 - Basic Layout & System Monitor
+Ekko TUI Block 1 - Basic Layout & System Monitor v1.3
+Corrected syntax and basic linting issues (unused imports, exceptions).
 """
 
 import logging
 import sys
-import time  # Needed for network rate calculation timing
+import time
 from pathlib import Path
-from typing import cast
+from typing import ClassVar, cast
 
 # Dependency Imports
 try:
-    import psutil  # For system stats
+    import psutil
 except ImportError:
     logging.basicConfig(level=logging.CRITICAL)
-    logging.critical("psutil library not found! Cannot run system monitor.")
-    print(
-        "ERROR: psutil library not found. Please activate the Ekko venv and run 'pip install psutil'",
-        file=sys.stderr,
-    )
+    logging.critical("psutil library not found!")
+    print("ERROR: psutil library not found.", file=sys.stderr)
     sys.exit("Dependency Error: psutil missing")
 
 try:
-    import asyncio  # Needed for sleep in example action
+    import asyncio
 
     from rich.text import Text
     from textual.app import App, ComposeResult
     from textual.binding import Binding
     from textual.containers import Container, VerticalScroll
     from textual.reactive import reactive
-    from textual.widgets import (
-        Footer,
-        Header,
-        Label,
-        LoadingIndicator,
-        Log,
-        Static,
-    )
+    from textual.widgets import Footer, Header, Label, LoadingIndicator, Log, Static
 except ImportError as e:
     logging.basicConfig(level=logging.CRITICAL)
     logging.critical(f"Textual import failed: {e}")
-    print("ERROR: Textual library not found or failed import.", file=sys.stderr)
-    print("Ensure setup script ran and venv is active.", file=sys.stderr)
+    # Handle specific ImportError for missing dependencies
+    print("ERROR: Textual library not found.", file=sys.stderr)
     sys.exit(f"Dependency Error: {e}")
 
 # Logging Setup
-LOG_FILE = Path(__file__).parent.parent.parent / "ekko_tui_debug.log"
 try:
-    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)  # Ensure log directory exists
+    LOG_FILE = Path(__file__).parent.parent.parent / "debug.log"
+    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(
         level=logging.DEBUG,
         filename=LOG_FILE,
         filemode="a",
-        format="%(asctime)s-%(levelname)s-%(name)s-%(module)s:%(lineno)d - %(message)s",
+        format="%(asctime)s-%(level)s-%(name)s-%(module)s:%(lineno)d - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 except Exception as log_e:
-    logging.basicConfig(level=logging.WARNING, format="%(levelname)s: %(message)s")
-    logging.error(f"Failed config file logging: {log_e}. Using basic console log.")
+    logging.basicConfig(level=logging.WARNING, format="%(level)s: %(message)s")
+    logging.error(f"Failed file logging: {log_e}. Using basic console log.")
 
-logger = logging.getLogger("EkkoTUI")
+logger = logging.getLogger("TUI")
 
 
-# Custom Widgets
 class SystemMonitor(Static):
     """A widget to display updating system resource usage."""
+
+    DEFAULT_CLASSES: ClassVar[str] = "system-monitor-widget"
 
     cpu_usage = reactive(0.0, layout=True)
     mem_total_gb = reactive(0.0, init=False)
@@ -86,12 +77,14 @@ class SystemMonitor(Static):
         logger.info(f"SysMon init: Interval={update_interval}s, Disk={disk_path}")
 
     def on_mount(self) -> None:
-        logger.info("SysMon mounted. Starting timer.")
+        logger.info("SysMon mounted.")
         try:
             self._net_counters_prev = psutil.net_io_counters(pernic=False)._asdict()
             self.last_net_update_time = time.monotonic()
-        except Exception:
-            pass
+        except psutil.Error as e:
+            logger.warning(f"Could not get initial net counters: {e}")
+        except Exception as e:
+            logger.warning(f"Unexpected error getting initial net counters: {e}")
         self.update_stats()
         self.set_interval(self._update_interval, self.update_stats)
 
@@ -102,16 +95,17 @@ class SystemMonitor(Static):
             self.mem_total_gb = mem.total / (1024**3)
             self.mem_available_gb = mem.available / (1024**3)
             self.mem_percent = mem.percent
-
             try:
                 disk = psutil.disk_usage(self.disk_path)
                 self.disk_total_gb = disk.total / (1024**3)
                 self.disk_used_gb = disk.used / (1024**3)
                 self.disk_percent = disk.percent
+            except FileNotFoundError:
+                logger.error(f"Disk path not found: {self.disk_path}")
+                self.disk_percent = -1.0
             except Exception as disk_e:
                 logger.error(f"Disk {self.disk_path} error: {disk_e}")
                 self.disk_percent = -1.0
-
             net_now_dict = psutil.net_io_counters(pernic=False)._asdict()
             net_now = {
                 "bytes_sent": net_now_dict["bytes_sent"],
@@ -164,23 +158,87 @@ class SystemMonitor(Static):
         net_str = "[dim]Net: N/A[/]"
         if self.net_rate:
             net_str = f"Net: ↑[green]{self.net_rate['sent_kbps']:>6.1f}[/]↓[cyan]{self.net_rate['recv_kbps']:>6.1f}[/] KB/s"
-        return Text.assemble(
+        line1 = Text.assemble(
             ("CPU:", cpu_style),
             (f"{self.cpu_usage:>5.1f}%", "default"),
             (" | MEM:", mem_style),
             (f"{self.mem_percent:>5.1f}%", "default"),
             (" | DISK:", disk_style),
-            (f"{disk_str}", "default"),
-            ("\n", "default"),
-            (net_str, "default"),
+            (f"{self.disk_str}", "default"),
         )
+        line2 = Text.assemble((net_str, "default"))
+        return line1 + "\n" + line2
 
 
-# Main TUI Application
 class EkkoTUI(App[None]):
+    """Project Ekko Textual User Interface - v0.1"""
+
     TITLE = "Project Ekko Control Plane v0.1"
     SUB_TITLE = "AI Dev & Deploy Orchestrator"
-    CSS = """Screen{layout:grid;grid-size:2;grid-columns:auto 1fr;grid-rows:auto 1fr auto;} Header{grid-column:1 / 3;grid-row:1;} Footer{grid-column:1 / 3;grid-row:3;} #sidebar{grid-column:1;grid-row:2;width:30;border-right:thick $accent;padding:1;overflow-y:auto;} #main-area{grid-column:2;grid-row:2;padding:0 1;layout:vertical;} #system-monitor{height:3;margin-bottom:1;border:round $accent;padding:0 1;} #main-content-scroll{height:1fr;} #main-content{padding:1;border:round $accent;margin-bottom:1;} #log-pane{height:10;border:round $accent;margin-top:1;display:block;} #loading{width:100%;height:1;display:none;margin-top:1;text-align:center;} .view{display:none;padding:1;} .view.visible{display:block;}"""
+    CSS = """
+    Screen {
+        layout: grid;
+        grid-size: 2;
+        grid-columns: auto 1fr;
+        grid-rows: auto 1fr auto;
+    }
+    Header {
+        grid-column: 1 / 3;
+        grid-row: 1;
+    }
+    Footer {
+        grid-column: 1 / 3;
+        grid-row: 3;
+    }
+    #sidebar {
+        grid-column: 1;
+        grid-row: 2;
+        width: 30;
+        border-right: thick $accent;
+        padding: 1;
+        overflow-y: auto;
+    }
+    #main-area {
+        grid-column: 2;
+        grid-row: 2;
+        padding: 0 1;
+        layout: vertical;
+    }
+    #system-monitor {
+        height: 3;
+        margin-bottom: 1;
+        border: round $accent;
+        padding: 0 1;
+    }
+    #main-content-scroll {
+        height: 1fr;
+    }
+    #main-content {
+        padding: 1;
+        border: round $accent;
+        margin-bottom: 1;
+    }
+    #log-pane {
+        height: 10;
+        border: round $accent;
+        margin-top: 1;
+        display: block;
+    }
+    #loading {
+        width: 100%;
+        height: 1;
+        display: none;
+        margin-top: 1;
+        text-align: center;
+    }
+    .view {
+        display: none;
+        padding: 1;
+    }
+    .view.visible {
+        display: block;
+    }
+    """
     BINDINGS = [
         Binding("d", "toggle_dark", "Dark Mode"),
         Binding("q", "request_quit", "Quit"),
@@ -264,14 +322,29 @@ class EkkoTUI(App[None]):
         loader.display = True
         log.write_line(f"[yellow]{msg}[/]")
         logger.info(f"Simulate: {msg}")
-        await asyncio.sleep(0.5)
-        loader.display = False
-        log.write_line(f"[green]OK: {msg}[/]")
-        logger.info("Simulate done.")
+        try:
+            await asyncio.sleep(0.5)
+            log.write_line(f"[green]OK: {msg}[/]")
+            logger.info("Simulate done.")
+        except asyncio.CancelledError:
+            # Handle asyncio-specific cancellation
+            logging.info("Async task was cancelled.")
+        # Add specific exception handling for asyncio errors
+        except ValueError as e:
+            logging.error(f"Value error occurred: {e}")
+            # Handle specific ValueError exceptions
+        except KeyError as e:
+            logging.error(f"Key error occurred: {e}")
+            # Handle specific KeyError exceptions
+        except Exception as e:
+            logger.error(f"Error during simulate action '{msg}': {e}")
+            log.write_line(f"[bold red]Error simulating action: {e}[/]")
+        finally:
+            loader.display = False
 
 
 if __name__ == "__main__":
-    logger.info("--- Starting Ekko TUI ---")
+    logger.info("--- Starting Ekko TUI Application ---")
     app = EkkoTUI()
     app.run()
-    logger.info("--- Ekko TUI Exited ---")
+    logger.info("--- Ekko TUI Application Exited ---")

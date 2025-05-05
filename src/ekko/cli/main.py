@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-# File: src/ekko/cli/main.py
 """
-Project Ekko - CLI Interface (using Typer) - Placeholder v1.2
-Basic structure with correct syntax and imports. Functionality TBD.
+Project Ekko - CLI Interface (using Typer) - Placeholder v1.3
+Corrected syntax, imports, and basic linting issues. Functionality TBD.
 """
 
 import logging
@@ -19,7 +18,7 @@ app = typer.Typer(
     name="ekko",
     help="Project Ekko: AI Development Platform CLI (v0.1 - Placeholder)",
     rich_markup_mode="markdown",
-    add_completion=False,
+    add_completion=False,  # Keep completion off for simplicity initially
 )
 
 
@@ -30,11 +29,10 @@ def main_callback(
     ] = False,
 ):
     """
-    Ekko CLI Root Callback. Placeholder for global options.
+    Ekko CLI Root Callback. Placeholder for global options like verbosity.
     """
-    # Logging level should ideally be set globally based on this flag
-    # For now, just log the invocation.
-    logger.info(f"Ekko CLI invoked. Verbose flag: {verbose}")
+    if verbose:
+        logger.info("Verbose mode requested (logging level set elsewhere).")
 
 
 @app.command()
@@ -95,8 +93,6 @@ def deploy(
     # TODO: Implement validation (unless skipped) and Ansible/Terraform integration
 
 
-# Entry point guard
 if __name__ == "__main__":
-    # This allows running the CLI module directly for testing if needed,
-    # but the primary entry point is via the 'ekko' script installed by pip/poetry
+    logger.info("Running Ekko CLI module directly for testing.")
     app()
