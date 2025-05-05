@@ -57,24 +57,10 @@ try:
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 except Exception as log_e:
-    fallback_log_file = Path.home() / "ekko_fallback.log"
-    try:
-        logging.basicConfig(
-            level=logging.WARNING,
-            filename=fallback_log_file,
-            filemode="a",
-            format="%(asctime)s-%(levelname)s-%(name)s-%(module)s:%(lineno)d - %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-        )
-        logging.warning(
-            f"Failed to log to {LOG_FILE}: {log_e}. Using fallback log file: {fallback_log_file}"
-        )
-    except Exception as fallback_e:
-        logging.basicConfig(level=logging.WARNING, format="%(levelname)s: %(message)s")
-        logging.error(f"Failed fallback logging: {fallback_e}. Logging to console.")
+    logging.basicConfig(level=logging.WARNING, format="%(levelname)s: %(message)s")
+    logging.error(f"Failed config file logging: {log_e}. Using basic console log.")
 
-LOGGER_NAME = "EkkoTUI"
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger("EkkoTUI")
 
 
 # Custom Widgets

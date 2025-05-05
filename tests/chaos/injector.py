@@ -7,7 +7,6 @@ Placeholder for future chaos engineering tests. Corrected syntax.
 
 import argparse
 import logging
-import random
 import sys  # Added missing import
 import time
 
@@ -40,9 +39,7 @@ def simulate_pod_failure(namespace: str, pod_selector: str):
 
 def main():
     """Main function to parse arguments and run chaos experiments."""
-    parser = argparse.ArgumentParser(
-        description="Ekko Chaos Injector (Placeholder)"
-    )
+    parser = argparse.ArgumentParser(description="Ekko Chaos Injector (Placeholder)")
     parser.add_argument(
         "--mode",
         choices=["latency", "pod_failure"],
@@ -55,12 +52,8 @@ def main():
     parser.add_argument(
         "--duration", type=int, default=30, help="Duration for latency (seconds)."
     )
-    parser.add_argument(
-        "--latency-ms", type=int, default=100, help="Max latency (ms)."
-    )
-    parser.add_argument(
-        "--namespace", default="default", help="Kubernetes namespace."
-    )
+    parser.add_argument("--latency-ms", type=int, default=100, help="Max latency (ms).")
+    parser.add_argument("--namespace", default="default", help="Kubernetes namespace.")
 
     args = parser.parse_args()
     logger.info(f"Starting chaos injection: Mode={args.mode}, Target={args.target}")
@@ -85,4 +78,3 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())  # Call main and exit with its code
-

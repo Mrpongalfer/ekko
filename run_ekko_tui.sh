@@ -120,39 +120,39 @@ async def _simulate_action(self, msg: str): loader=self.query_one(LoadingIndicat
 if name == "main": logger.info("--- Starting Ekko TUI ---"); app = EkkoTUI(); app.run(); logger.info("--- Ekko TUI Exited ---")
 
 EOF
-echo "INFO: Saved src/ekko/tui/main.py." && 
+echo "INFO: Saved src/ekko/tui/main.py." &&
 
-echo "INFO: Activating Ekko venv..." && 
+echo "INFO: Activating Ekko venv..." &&
 
-source .venv/bin/activate && 
+source .venv/bin/activate &&
 
-echo "INFO: Ensuring dependencies (including psutil)..." && 
+echo "INFO: Ensuring dependencies (including psutil)..." &&
 
-python -m pip install -e ".[dev]" && 
+python -m pip install -e ".[dev]" &&
 
-echo "INFO: Running pre-commit checks..." && 
+echo "INFO: Running pre-commit checks..." &&
 
-pre-commit run --all-files && 
+pre-commit run --all-files &&
 
-echo "INFO: Renaming launch script run_nexusterm.sh to run_ekko_tui.sh..." && 
+echo "INFO: Renaming launch script run_nexusterm.sh to run_ekko_tui.sh..." &&
 
-if [ -f run_nexusterm.sh ]; then mv run_nexusterm.sh run_ekko_tui.sh && git add run_nexusterm.sh run_ekko_tui.sh; else echo "[Warn] run_nexusterm.sh not found, assuming already renamed."; fi && 
+if [ -f run_nexusterm.sh ]; then mv run_nexusterm.sh run_ekko_tui.sh && git add run_nexusterm.sh run_ekko_tui.sh; else echo "[Warn] run_nexusterm.sh not found, assuming already renamed."; fi &&
 
-echo "INFO: Committing TUI Block 1..." && 
+echo "INFO: Committing TUI Block 1..." &&
 
-git add src/ekko/tui/main.py .github/workflows/ci.yaml && 
+git add src/ekko/tui/main.py .github/workflows/ci.yaml &&
 
-git commit -m "feat(tui): Implement Ekko Block 1 - Layout & System Monitor widget" && 
+git commit -m "feat(tui): Implement Ekko Block 1 - Layout & System Monitor widget" &&
 
-echo "INFO: Deactivating venv." && 
+echo "INFO: Deactivating venv." &&
 
-deactivate && 
+deactivate &&
 
-echo "" && 
+echo "" &&
 
-echo ">>> SUCCESS: Ekko TUI Block 1 implemented and committed. <<<" && 
+echo ">>> SUCCESS: Ekko TUI Block 1 implemented and committed. <<<" &&
 
-echo ">>> Run './run_ekko_tui.sh' to start the TUI. <<<" || 
+echo ">>> Run './run_ekko_tui.sh' to start the TUI. <<<" ||
 
 ( echo "ERROR: Failed during TUI implementation steps. Check output." && deactivate && exit 1 )
 # ---------------------------------------------
